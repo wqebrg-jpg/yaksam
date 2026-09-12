@@ -66,7 +66,7 @@ with open(cmake_path, "r", encoding="utf-8") as stream:
     cmake_source = stream.read()
 
 for marker in (
-    'set(TH07_IOS_BUILD "47"',
+    'set(TH07_IOS_BUILD "48"',
     'XCODE_ATTRIBUTE_LLVM_LTO "YES_THIN"',
     'set(SDL_GPU OFF CACHE BOOL "" FORCE)',
     'set(SDL_RENDER ON CACHE BOOL "" FORCE)',
@@ -129,11 +129,11 @@ for marker in ("CMake.app/Contents/bin", "-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC
     if marker not in ios_build_source:
         print("error: iOS build script marker missing:", marker)
         failed = True
-if "IOS_BUILD=${IOS_BUILD:-47}" not in ios_build_source:
-    print("error: iOS build script does not default to build 47")
+if "IOS_BUILD=${IOS_BUILD:-48}" not in ios_build_source:
+    print("error: iOS build script does not default to build 48")
     failed = True
-if "[int]$IosBuild = 47" not in remote_build_source:
-    print("error: remote Mac build script does not default to build 47")
+if "[int]$IosBuild = 48" not in remote_build_source:
+    print("error: remote Mac build script does not default to build 48")
     failed = True
 if failed:
     sys.exit(2)
@@ -482,7 +482,7 @@ for relative in (os.path.join("src", "EffectManager.cpp"),
         failed = True
 if failed:
     sys.exit(2)
-print("ok: Build 47 pause label mapping, language restart, localization safety and online markers")
+print("ok: Build 48 pause label mapping, language restart, localization safety and online markers")
 
 with open(os.path.join(root, "src", "ContentLocalization.cpp"), "r", encoding="utf-8") as stream:
     content_localization_source = stream.read()
@@ -525,6 +525,9 @@ for marker in (
 for marker in (
         "DrawScreenText",
         "FitFontToRegion",
+        "GetLocalizedRegionMaxHeight",
+        "scalePercent",
+        "? 124",
         "if (!*source)",
         "SetTextureSubImage(xPos, yPos, regionWidth, regionHeight"):
     if marker not in text_helper_source:

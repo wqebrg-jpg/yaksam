@@ -49,8 +49,21 @@ static i32 GetRenderFontSize(i32 fontHeight, bool localizedFont)
     const i32 stockSize = fontHeight * 2 - 2;
     if (!localizedFont)
         return stockSize;
-    // Noto Sans SC has a smaller apparent glyph body than the stock font.
-    return (stockSize * 118 + 50) / 100;
+    // Noto Sans SC has a smaller apparent glyph body than the stock font in
+    // the game's atlas regions. Give Chinese a small additional boost while
+    // keeping the existing localized scale for English text.
+    const i32 scalePercent = Localization::GetLanguage() == Localization::Language::Chinese
+                                 ? 124
+                                 : 118;
+    return (stockSize * scalePercent + 50) / 100;
+}
+
+static i32 GetLocalizedRegionMaxHeight(i32 regionHeight)
+{
+    // The region is uploaded back into the original atlas at the end of the
+    // render path. Keep enough room for the four-pixel outline while avoiding
+    // the old eight-pixel deduction that made CJK glyphs visibly undersized.
+    return std::max(1, regionHeight * 2 - 4);
 }
 
 static void FitFontToRegion(TTF_Font *font, const char *text, i32 &fontSize,
@@ -513,7 +526,7 @@ void TextHelper::RenderTextToTextureRegion(i32 xPos, i32 yPos, i32 regionWidth,
     }
 
     FitFontToRegion(font, convStr, fontSize, regionWidth * 2 - 8,
-                    regionHeight * 2 - 8);
+                    GetLocalizedRegionMaxHeight(regionHeight));
 
     SDL_Color white = {255, 255, 255, 255};
     SDL_Surface *textSurf = TTF_RenderText_Blended(font, convStr, 0, white);
