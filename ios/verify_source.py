@@ -28,6 +28,7 @@ required = {
     "ios/mac_build.local.psd1.example": 1,
     "tools/publish_github.ps1": 1,
     "ios/OnlineLauncher.mm": 1,
+    "ios/SystemLanguage.mm": 1,
     "ios/test_online_protocol.cpp": 1,
     "src/ContentLocalization.cpp": 1,
     "tools/generate_content_localization.py": 1,
@@ -66,7 +67,7 @@ with open(cmake_path, "r", encoding="utf-8") as stream:
     cmake_source = stream.read()
 
 for marker in (
-    'set(TH07_IOS_BUILD "48"',
+    'set(TH07_IOS_BUILD "49"',
     'XCODE_ATTRIBUTE_LLVM_LTO "YES_THIN"',
     'set(SDL_GPU OFF CACHE BOOL "" FORCE)',
     'set(SDL_RENDER ON CACHE BOOL "" FORCE)',
@@ -129,11 +130,11 @@ for marker in ("CMake.app/Contents/bin", "-DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC
     if marker not in ios_build_source:
         print("error: iOS build script marker missing:", marker)
         failed = True
-if "IOS_BUILD=${IOS_BUILD:-48}" not in ios_build_source:
-    print("error: iOS build script does not default to build 48")
+if "IOS_BUILD=${IOS_BUILD:-49}" not in ios_build_source:
+    print("error: iOS build script does not default to build 49")
     failed = True
-if "[int]$IosBuild = 48" not in remote_build_source:
-    print("error: remote Mac build script does not default to build 48")
+if "[int]$IosBuild = 49" not in remote_build_source:
+    print("error: remote Mac build script does not default to build 49")
     failed = True
 if failed:
     sys.exit(2)
@@ -392,6 +393,8 @@ online_markers = {
         "g_RestartRequested = true",
         "Only publish the new language after its config is safely persisted",
         "localized != original",
+        "if (!hasSavedLanguage)",
+        "TH07_IOS_GetPreferredGameLanguage()",
     ),
     os.path.join("src", "TextHelper.cpp"): (
         "g_LocalizedRegions",
@@ -447,6 +450,11 @@ online_markers = {
         "TH07ActiveWindow",
         "gPromptVisible",
     ),
+    os.path.join("ios", "SystemLanguage.mm"): (
+        "[NSLocale preferredLanguages]",
+        'isEqualToString:@"ja"',
+        'isEqualToString:@"zh"',
+    ),
     os.path.join("ios", "LocalNetworkPermission.mm"): (
         '_th07-online._udp.',
         "TH07_IOS_StartBonjourHost",
@@ -482,7 +490,7 @@ for relative in (os.path.join("src", "EffectManager.cpp"),
         failed = True
 if failed:
     sys.exit(2)
-print("ok: Build 48 pause label mapping, language restart, localization safety and online markers")
+print("ok: Build 49 pause label mapping, language restart, localization safety and online markers")
 
 with open(os.path.join(root, "src", "ContentLocalization.cpp"), "r", encoding="utf-8") as stream:
     content_localization_source = stream.read()

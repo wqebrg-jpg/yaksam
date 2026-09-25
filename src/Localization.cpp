@@ -6,6 +6,10 @@
 
 #include "FileSystem.hpp"
 
+#if defined(TH07_IOS)
+extern "C" int TH07_IOS_GetPreferredGameLanguage();
+#endif
+
 namespace
 {
 constexpr unsigned int kConfigMagic = 0x31474e4cu; // LNG1
@@ -120,6 +124,7 @@ void Initialize()
     g_TitlePageActive = false;
     const std::string path = FileSystem::GetPrefPath("language.cfg");
     FILE *file = std::fopen(path.c_str(), "rb");
+    bool hasSavedLanguage = false;
     if (file)
     {
         LanguageConfig config = {};
@@ -128,9 +133,24 @@ void Initialize()
             config.language <= static_cast<unsigned char>(Language::English))
         {
             g_Language = static_cast<Language>(config.language);
+            hasSavedLanguage = true;
         }
         std::fclose(file);
     }
+#if defined(TH07_IOS)
+    if (!hasSavedLanguage)
+    {
+        g_Language = static_cast<Language>(TH07_IOS_GetPreferredGameLanguage());
+        const LanguageConfig config = {kConfigMagic, kConfigVersion,
+                                       static_cast<unsigned char>(g_Language), {0, 0}};
+        file = std::fopen(path.c_str(), "wb");
+        if (file)
+        {
+            std::fwrite(&config, sizeof(config), 1, file);
+            std::fclose(file);
+        }
+    }
+#endif
 }
 
 Language GetLanguage()
