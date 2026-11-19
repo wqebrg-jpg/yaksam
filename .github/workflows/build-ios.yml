@@ -1,0 +1,39 @@
+name: Build Unsigned iOS IPA
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Configure CMake for iOS
+        run: |
+          mkdir build && cd build
+          cmake -G Xcode -DCMAKE_SYSTEM_NAME=iOS -DTH_EXTERNAL_ASSETS=ON ..
+
+      - name: Build Unsigned .app
+        run: |
+          cd build
+          xcodebuild -configuration Release -sdk iphoneos \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package into unsigned .ipa
+        run: |
+          mkdir -p Payload
+          APP_PATH=$(find build -name "*.app" -type d | head -n 1)
+          cp -r "$APP_PATH" Payload/
+          zip -r th07-ios.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: th07-ios-ipa
+          path: th07-ios.ipa
